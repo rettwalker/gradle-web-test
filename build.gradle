@@ -1,0 +1,45 @@
+plugins {
+    id "org.kravemir.gradle.sass" version "1.2.2"
+    id "com.moowork.node" version "1.1.1"
+}
+
+task npmPackages(type: NpmTask) {
+    description = "Install Node.js packages"
+    args = [ 'install' ]
+    inputs.files file('package.json')
+    outputs.files file('node_modules')
+}
+
+task bowerInstall(type: NodeTask) {
+    script = file('node_modules/bower/bin/bower')
+    args = ["--config.storage.cache=${gradle.getGradleUserHomeDir()}/caches/bower/cache",
+            "--config.storage.packages=${gradle.getGradleUserHomeDir()}/caches/bower/packages",
+            "--config.storage.registry=${gradle.getGradleUserHomeDir()}/caches/bower/registry",
+            'install']
+    inputs.files file('bower.json')
+    outputs.files file('bower_components')
+    dependsOn npmPackages
+}
+
+task bowerAddJsToVendor() {
+    FileTree tree = fileTree(dir:'bower_components')
+
+    tree.include {'**/*.min.js'}
+
+    tree.each {File file ->
+        println file
+    }
+}
+
+task bowerAddCSSToVendor(type: Sync) {
+
+}
+
+group 'gradle-web-builder-test'
+version '1.0-SNAPSHOT'
+
+
+//Run Tests
+//Build to Development
+//Build to Prod
+//Live Reloading
